@@ -66,6 +66,7 @@ body {
 
 .table {
   height: $card-height;
+  text-align: center;
 }
 
 button {
@@ -89,4 +90,9 @@ button {
     transform: none;
     cursor: default;
   }
+}
+.result-text {
+  font-size: 1.3rem;
+  color: white;
+  text-align: center;
 }

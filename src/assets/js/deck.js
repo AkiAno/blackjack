@@ -4,7 +4,6 @@
 function randint(min, max) {
   return Math.round(min + Math.random() * (max - min));
 }
-let index = 0;
 let bet = document.getElementById('bet');
 /*
  * The deck of cards to deal from.
@@ -67,6 +66,9 @@ class Deck {
     ];
     this.playerScore = 0;
     this.dealerScore = 0;
+    this.dead = false;
+    this.index = 0;
+    this.betValue = 0;
   }
 
   /*
@@ -81,65 +83,119 @@ class Deck {
     }
   }
   getCards() {
-    let currentCard = this.cards[index];
-    index++;
+    let currentCard = this.cards[this.index];
+    this.index++;
     return currentCard;
   }
+  newGame(){
+    let dealerCards = document.getElementById('dealer_cards');
+    let playerCards = document.getElementById('player_cards');
+    let game = document.getElementById('game');
+    game.style.display = 'none';
+    dealerCards.innerHTML = '';
+    playerCards.innerHTML = '';
+    bet.style.display = 'block';
+    this.index = 0;
+  }
 
+  result(num){
+    let result = document.getElementById('result');
+    this.betValue = parseInt(document.getElementById('betValue').value);
+    console.log(this.betValue);
+    if(this.dealerScore > this.playerScore && this.dealerScore <= 21){
+      this.betValue = 0;
+      result.innerHTML = `<p class=\'result-text\'>The Dealer won.You balance is ${this.betValue}.</p>`;
+    } else if(this.dealerScore < this.playerScore && this.playerScore <= 21){
+      this.betValue *= 2; 
+      result.innerHTML = `<p class=\'result-text\'>You won.You balance is ${this.betValue}.</p>`;
+    } else if(this.dealerScore === this.playerScore){
+      result.innerHTML = '<p class=\'result-text\'>It is tie.</p>';
+    } else if(this.dealerScore < this.playerScore && this.playerScore >= 21) {
+      this.betValue = 0;
+      result.innerHTML = `<p class=\'result-text\'>The Dealer won. You balance is ${this.betValue}.</p>`;
+    } else if(this.playerScore === num) {
+      this.betValue *= 1.5; 
+      result.innerHTML = `<p class=\'result-text\'>BlackJack.You balance is ${this.betValue}.</p>`;
+    } else if(this.dealerScore > this.playerScore && this.dealerScore > 21){
+      this.betValue *= 2;
+      result.innerHTML = `<p class=\'result-text\'>You won.You balance is ${this.betValue}.</p>`;
+    }
+    result.innerHTML += `</br><button class='newBet' onclick='play()'>NEW BET</button>`;
+  }
+
+   reveal(){
+    this.dead =true;
+    let scoredealer = document.getElementById('scoredealer');
+    scoredealer.innerHTML = "";
+    scoredealer.innerHTML = "Score: " + this.dealerScore;
+    let score = document.getElementById('score');
+    score.innerHTML = "";
+    score.innerHTML = "Score: " + this.playerScore; 
+    this.result(1);
+   }
    stand(){
     let card;
-        for(let i=0; i < index; i++) {
-          card = document.getElementById('card'+ i);
-          if (card.classList.contains("face-revers")){
-            card.className = `card face-${cards[i].rank}-of-${cards[i].suit}`;
-          }
-          
-        }
-       
-        
- /*    let scoredealer = document.getElementById('scoredealer');
-    scoredealer.innerHTML = "";
-    scoredealer.innerHTML = "Score: " + this.dealerScore;  */
-   }
-
+    console.log('stand');
+    card = document.getElementById('card-reverse');
+    card.className = `card face-${this.cards[2].rank}-of-${this.cards[2].suit}`;
+    this.reveal();
+  }
+  
   calValue(dealer, player){
-    if (this.playerScore <= 21){
-       this.playerScore += player;
-    } else {
-      stand();
+      this.playerScore += player;
+      this.dealerScore += dealer;
+    if (this.playerScore >= 21 || this.dealerScore >= 17){
+      this.stand(); 
     }
-
-    if (this.dealerScore <= 17){
-       this.dealerScore += dealer;
-    } else{
-      stand();
-    }
-
     let score = document.getElementById('score');
-        score.innerHTML = "";
-        score.innerHTML = "Score: " + this.playerScore; 
-     
-    
+    score.innerHTML = "";
+    score.innerHTML = "Score: " + this.playerScore; 
   } 
 
-
-
-  displayCards() {
+ displayCards() {
     let currentCard = this.getCards();
     let nextCard = this.getCards();
-    this.calValue(currentCard.value, nextCard.value);
     let dealerCards = document.getElementById('dealer_cards');
     let playerCards = document.getElementById('player_cards');
     let game = document.getElementById('game');
     bet.style.display = 'none';
     game.style.display = 'block';
-    if(index === 4){
-      dealerCards.innerHTML += `<div id="card${index}" class="card face-revers"></div>`;  
+    if(this.playerScore >= 21 || this.dealerScore >= 17) {
+      this.stand()
     } else {
-      dealerCards.innerHTML += `<div id="card${index}" class="card face-${currentCard.rank}-of-${currentCard.suit}"></div>`;
+      if(this.dead === false){
+        if(this.index === 4){
+          dealerCards.innerHTML += `<div id="card-reverse" class="card face-revers"></div>`;  
+          if(playerCards.rank === 'ace'){
+            switch(this.cards[1]){
+              case 'king': 
+              this.result(21);
+              break;
+              case 'queen': 
+              this.result(21);
+              break;
+              case 'jack': 
+              this.result(21);
+              break;
+              case '10': 
+              this.result(21);
+              break;
+              default:
+              this.result(1);
+              break;
+            }
+          } else if(playerCards.rank === 'king' || playerCards.rank === 'queen' || playerCards.rank === 'jack' || playerCards.rank === '10'){
+              if(this.cards[1] == 'ace'){
+                this.result(21);
+              }
+            }
+        } else {
+          dealerCards.innerHTML += `<div id="card${this.index}" class="card face-${currentCard.rank}-of-${currentCard.suit}"></div>`;
+        }
+        playerCards.innerHTML += `<div id="card${this.index}" class="card face-${nextCard.rank}-of-${nextCard.suit}"></div>`;  
+        this.calValue(currentCard.value, nextCard.value); 
+      }
     }
-    playerCards.innerHTML += `<div id="card${index}" class="card face-${nextCard.rank}-of-${nextCard.suit}"></div>`;
-    
   }
   hit(){
     this.displayCards();
