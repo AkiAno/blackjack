@@ -10,5 +10,6 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   hit.addEventListener('click', () => {
     deck.hit();
+    
   });
 });

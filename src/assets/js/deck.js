@@ -64,7 +64,9 @@ class Deck {
       new Card('jack', 'diamonds', 10),
       new Card('queen', 'diamonds', 10),
       new Card('king', 'diamonds', 10),
-    ]
+    ];
+    this.playerScore = 0;
+    this.dealerScore = 0;
   }
 
   /*
@@ -83,23 +85,64 @@ class Deck {
     index++;
     return currentCard;
   }
+
+   stand(){
+    let card;
+        for(let i=0; i < index; i++) {
+          card = document.getElementById('card'+ i);
+          if (card.classList.contains("face-revers")){
+            card.className = `card face-${cards[i].rank}-of-${cards[i].suit}`;
+          }
+          
+        }
+       
+        
+ /*    let scoredealer = document.getElementById('scoredealer');
+    scoredealer.innerHTML = "";
+    scoredealer.innerHTML = "Score: " + this.dealerScore;  */
+   }
+
+  calValue(dealer, player){
+    if (this.playerScore <= 21){
+       this.playerScore += player;
+    } else {
+      stand();
+    }
+
+    if (this.dealerScore <= 17){
+       this.dealerScore += dealer;
+    } else{
+      stand();
+    }
+
+    let score = document.getElementById('score');
+        score.innerHTML = "";
+        score.innerHTML = "Score: " + this.playerScore; 
+     
+    
+  } 
+
+
+
   displayCards() {
     let currentCard = this.getCards();
     let nextCard = this.getCards();
+    this.calValue(currentCard.value, nextCard.value);
     let dealerCards = document.getElementById('dealer_cards');
     let playerCards = document.getElementById('player_cards');
     let game = document.getElementById('game');
     bet.style.display = 'none';
     game.style.display = 'block';
     if(index === 4){
-      dealerCards.innerHTML += `<div class="card face-revers"></div>`;  
+      dealerCards.innerHTML += `<div id="card${index}" class="card face-revers"></div>`;  
     } else {
-      dealerCards.innerHTML += `<div class="card face-${currentCard.rank}-of-${currentCard.suit}"></div>`;
+      dealerCards.innerHTML += `<div id="card${index}" class="card face-${currentCard.rank}-of-${currentCard.suit}"></div>`;
     }
-    playerCards.innerHTML += `<div class="card face-${nextCard.rank}-of-${nextCard.suit}"></div>`;
+    playerCards.innerHTML += `<div id="card${index}" class="card face-${nextCard.rank}-of-${nextCard.suit}"></div>`;
     
   }
   hit(){
     this.displayCards();
   }
+  
 }
